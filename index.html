@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Production Report</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f6f8fa;
+    }
+    h2 {
+      text-align: center;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 450px;
+      margin: auto;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    .status {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>📋 Daily Production Report</h2>
+
+  <form id="reportForm">
+    <label>Tanggal:</label>
+    <input type="date" id="date" required />
+
+    <label>Shift:</label>
+    <select id="shift" required>
+      <option value="">-- Pilih Shift --</option>
+      <option>A</option>
+      <option>B</option>
+      <option>C</option>
+    </select>
+
+    <label>Pit:</label>
+    <input type="text" id="pit" placeholder="Contoh: Pit 3 Barat" required />
+
+    <label>Nomor Unit:</label>
+    <input type="text" id="unitNo" placeholder="Contoh: EX200-5 #102" required />
+
+    <label>Material:</label>
+    <select id="material" required>
+      <option value="">-- Pilih Material --</option>
+      <option>Overburden</option>
+      <option>Coal</option>
+    </select>
+
+    <label>Jarak Angkut (m):</label>
+    <input type="number" id="haulingDistance" min="0" required />
+
+    <label>Produksi (Ton/BCM):</label>
+    <input type="number" id="production" min="0" required />
+
+    <label>Fuel (Liter):</label>
+    <input type="number" id="fuel" min="0" required />
+
+    <label>Working Hours (HM):</label>
+    <input type="number" id="workingHours" min="0" step="0.1" required />
+
+    <label>Delay (menit):</label>
+    <input type="number" id="delay" min="0" required />
+
+    <label>Keterangan:</label>
+    <textarea id="remarks" placeholder="Catatan lapangan..."></textarea>
+
+    <label>Submitted By:</label>
+    <input type="text" id="submittedBy" placeholder="Nama pengawas/operator" required />
+
+    <button type="submit">Kirim Data</button>
+  </form>
+
+  <div class="status" id="statusMsg"></div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz6jWV9nEfI_tgmXZ7xjfoUWxwiIQ5ijagWIAVBbQkqMOp62jEO9atCHdYuW0vOiGg8/exec"; // Ganti dengan URL dari Apps Script
+
+    document.getElementById("reportForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        date: document.getElementById("date").value,
+        shift: document.getElementById("shift").value,
+        pit: document.getElementById("pit").value,
+        unitNo: document.getElementById("unitNo").value,
+        material: document.getElementById("material").value,
+        haulingDistance: document.getElementById("haulingDistance").value,
+        production: document.getElementById("production").value,
+        fuel: document.getElementById("fuel").value,
+        workingHours: document.getElementById("workingHours").value,
+        delay: document.getElementById("delay").value,
+        remarks: document.getElementById("remarks").value,
+        submittedBy: document.getElementById("submittedBy").value
+      };
+
+      document.getElementById("statusMsg").innerText = "⏳ Mengirim data...";
+      try {
+        const res = await fetch(WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await res.json();
+
+        if (data.result === "success") {
+          document.getElementById("statusMsg").innerText = "✅ Data berhasil dikirim!";
+          e.target.reset();
+        } else {
+          document.getElementById("statusMsg").innerText = "❌ Gagal: " + data.message;
+        }
+      } catch (err) {
+        document.getElementById("statusMsg").innerText = "⚠️ Gagal koneksi, coba lagi nanti.";
+      }
+    });
+  </script>
+</body>
+</html>
